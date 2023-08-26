@@ -153,20 +153,61 @@ class Tree<E> {
     // -> recursively call function on root.left
     // Case 3: root.left and root.right are both null
     // -> apply fn to root, add to accumulator
-    // -> go back up the chain?
 
     inOrderRec(root: TreeNode<E> | null, acc: E[], fn?: (x: E) => E): E[] | null {
-        //WIP
-
         if (!root) return null;
 
         const func = fn ?? ((x: E): E => x);
          
         if (root.left) {
             this.inOrderRec(root.left, acc, func);
-        }   
+        }
+
+        acc.push(func(root.value));
+
+        if (root.right) {
+            this.inOrderRec(root.right, acc, func);
+        }
 
         return acc;
+    }
+
+    inOrder(fn?: (x: E) => E): E[] | null {
+        return this.inOrderRec(this.root, [], fn);
+    }
+
+    preOrderRec(root: TreeNode<E> | null, acc: E[], fn?: (x: E) => E): E[] | null {
+        if (!root) return null;
+
+        const func = fn ?? ((x: E): E => x);
+
+        acc.push(func(root.value));
+
+        if (root.left) this.preOrderRec(root.left, acc, func);
+        if (root.right) this.preOrderRec(root.right, acc, func);
+
+        return acc;
+    }
+
+    preOrder(fn?: (x: E) => E): E[] | null {
+        return this.preOrderRec(this.root, [], fn);
+    }
+
+    postOrderRec(root: TreeNode<E> | null, acc: E[], fn?: (x: E) => E): E[] | null {
+        if (!root) return null;
+
+        const func = fn ?? ((x: E): E => x);
+
+        if (root.left) this.postOrderRec(root.left, acc, func);
+        if (root.right) this.postOrderRec(root.right, acc, func);
+
+        acc.push(func(root.value));
+
+        return acc;
+    }
+
+    postOrder(fn?: (x: E) => E): E[] | null {
+        return this.postOrderRec(this.root, [], fn);
     }
 
     heightRec(root: TreeNode<E> | null): number {
