@@ -1,34 +1,32 @@
-import { ro } from "date-fns/locale";
+class TreeNode {
+    value: number;
+    left: TreeNode | null;
+    right: TreeNode | null;
 
-class TreeNode<E> {
-    value: E;
-    left: TreeNode<E> | null;
-    right: TreeNode<E> | null;
-
-    constructor(val: E) {
+    constructor(val: number) {
         this.value = val;
     }
 }
 
-class Tree<E> {
-    root: TreeNode<E> | null;
+export class Tree {
+    root: TreeNode | null;
 
-    constructor(arr: E[]) {
+    constructor(arr: number[]) {
         this.root = this.sortedArrayToBST(arr, 0, arr.length);
     }
 
-    sortedArrayToBST(arr: E[], start: number, end: number): TreeNode<E> | null {
+    sortedArrayToBST(arr: number[], start: number = 0, end: number = arr.length - 1): TreeNode | null {
         if (start > end) return null;
         const mid = Math.floor((start - end) / 2);
         const node = new TreeNode(arr[mid]);
 
-        node.left = this.sortedArrayToBST(arr, start, mid - 1);
-        node.right = this.sortedArrayToBST(arr, mid + 1, end);
+        node.left = this.sortedArrayToBST(arr, start, mid);
+        node.right = this.sortedArrayToBST(arr, mid, end);
 
         return node;
     }
 
-    find(value: E): TreeNode<E> | null {
+    find(value: number): TreeNode | null {
         let curr = this.root;
         
         while (curr) {
@@ -44,7 +42,7 @@ class Tree<E> {
         return null;
     }
 
-    insert(value: E): void {
+    insert(value: number): void {
         const node = new TreeNode(value);
 
         if (!this.root) {
@@ -52,7 +50,7 @@ class Tree<E> {
             return;
         }
 
-        let curr: TreeNode<E> | null = this.root;
+        let curr: TreeNode | null = this.root;
 
         while (curr) {
             if (value < curr.value && !curr.left) {
@@ -69,7 +67,7 @@ class Tree<E> {
         }
     }
 
-    deleteRec(root: TreeNode<E> | null, value: E): TreeNode<E> | null {
+    deleteRec(root: TreeNode | null, value: number): TreeNode | null {
         if (!root) return root;
 
         if (root.value > value) {
@@ -88,7 +86,7 @@ class Tree<E> {
             return temp;
         } else {
             let succParent = root;
-            let succ: TreeNode<E> | null = root.right;
+            let succ: TreeNode | null = root.right;
 
             while (succ.left) {
                 succParent = succ;
@@ -108,147 +106,92 @@ class Tree<E> {
         }
     }
 
-    delete(value: E): TreeNode<E> | null {
+    delete(value: number): TreeNode | null {
         this.root = this.deleteRec(this.root, value);
         return this.root;
     }
 
-    levelOrderRec(queue: TreeNode<E>[], acc: E[], fn?: (x: E) => E): E[] {
+    levelOrder(queue: (TreeNode | null)[] = [this.root], acc: number[] = [], fn: (x: number) => number = ((x) => x)): number[] {
         if (queue.length < 1) return acc;
-        
-        const func = fn ?? ((x: E): E => x);
 
-        let nextQueue: TreeNode<E>[] = [];
+        let nextQueue: TreeNode[] = [];
         let nextAcc = [...acc];
 
-        queue.forEach((item: TreeNode<E>) => {
+        queue.forEach((item: TreeNode | null) => {
+            if (!item) return;
             if (item.left) nextQueue.push(item.left);
             if (item.right) nextQueue.push(item.right);
-            nextAcc.push(func(item.value));
+            nextAcc.push(fn(item.value));
         });
 
-        return this.levelOrderRec(nextQueue, nextAcc, func);
+        return this.levelOrder(nextQueue, nextAcc, fn);
     }
 
-    levelOrder(fn?: (x: E) => E): E[] | null {
-        if (!this.root) return null;
-        else return this.levelOrderRec([this.root], [], fn);
-    }
-
-
-    // Write inorder, preorder, and postorder functions that accept a function parameter. 
-    // Each of these functions should traverse the tree in their respective depth-first order 
-    // and yield each node to the provided function given as an argument. 
-    // The functions should return an array of values if no function is given.
-
-    // inOrder: Left, Root, Right.
-    // This means the LEFTMOST node is the FIRST node.
-    // Let's implement this recursively.
-    // Inputs: root: TreeNode<E>, acc: E[], fn?: (x: E) => E)
-    // Outputs: E[]
-    // Case 1: root.left is null and root.right is not null
-    // -> apply fn to root, add to accumulator
-    // -> recursively call function on root.right
-    // Case 2: root.left is not null
-    // -> recursively call function on root.left
-    // Case 3: root.left and root.right are both null
-    // -> apply fn to root, add to accumulator
-
-    inOrderRec(root: TreeNode<E> | null, acc: E[], fn?: (x: E) => E): E[] | null {
+    inOrder(root: TreeNode | null = this.root, acc: number[] = [], fn: (x: number) => number = ((x) => x)): number[] | null {
         if (!root) return null;
-
-        const func = fn ?? ((x: E): E => x);
          
-        if (root.left) {
-            this.inOrderRec(root.left, acc, func);
-        }
-
-        acc.push(func(root.value));
-
-        if (root.right) {
-            this.inOrderRec(root.right, acc, func);
-        }
+        if (root.left) this.inOrder(root.left, acc, fn);
+        acc.push(fn(root.value));
+        if (root.right) this.inOrder(root.right, acc, fn);
 
         return acc;
     }
 
-    inOrder(fn?: (x: E) => E): E[] | null {
-        return this.inOrderRec(this.root, [], fn);
-    }
-
-    preOrderRec(root: TreeNode<E> | null, acc: E[], fn?: (x: E) => E): E[] | null {
+    preOrder(root: TreeNode | null = this.root, acc: number[] = [], fn: (x: number) => number = ((x) => x)): number[] | null {
         if (!root) return null;
 
-        const func = fn ?? ((x: E): E => x);
+        acc.push(fn(root.value));
 
-        acc.push(func(root.value));
-
-        if (root.left) this.preOrderRec(root.left, acc, func);
-        if (root.right) this.preOrderRec(root.right, acc, func);
+        if (root.left) this.preOrder(root.left, acc, fn);
+        if (root.right) this.preOrder(root.right, acc, fn);
 
         return acc;
     }
 
-    preOrder(fn?: (x: E) => E): E[] | null {
-        return this.preOrderRec(this.root, [], fn);
-    }
-
-    postOrderRec(root: TreeNode<E> | null, acc: E[], fn?: (x: E) => E): E[] | null {
+    postOrder(root: TreeNode | null = this.root, acc: number[] = [], fn: (x: number) => number = ((x) => x)): number[] | null {
         if (!root) return null;
+        if (root.left) this.postOrder(root.left, acc, fn);
+        if (root.right) this.postOrder(root.right, acc, fn);
 
-        const func = fn ?? ((x: E): E => x);
-
-        if (root.left) this.postOrderRec(root.left, acc, func);
-        if (root.right) this.postOrderRec(root.right, acc, func);
-
-        acc.push(func(root.value));
+        acc.push(fn(root.value));
 
         return acc;
     }
 
-    postOrder(fn?: (x: E) => E): E[] | null {
-        return this.postOrderRec(this.root, [], fn);
-    }
-
-    heightRec(root: TreeNode<E> | null): number {
+    height(root: TreeNode | null = this.root): number {
         if (!root) return -1;
         else if (!root.left && !root.right) return 1;
-        else if (!root.left && root.right) return this.heightRec(root.right);
-        else if (!root.right && root.left) return this.heightRec(root.left);
-        else return Math.max(this.heightRec(root.left), this.heightRec(root.right)) + 1
+        else if (!root.left && root.right) return this.height(root.right);
+        else if (!root.right && root.left) return this.height(root.left);
+        else return Math.max(this.height(root.left), this.height(root.right)) + 1
     }
 
-    height(): number {
-        return this.heightRec(this.root);
-    }
 
-    depthRec(node: TreeNode<E> | null, root: TreeNode<E> | null): number {
+    depth(node: TreeNode | null, root: TreeNode | null = this.root): number {
         if (!node || !root) return -1;
         else if (node.value === root.value) return 0;
-        else if (!root.left || node.value > root.value) return 1 + this.depthRec(node, root.right);
-        else if (!root.right || node.value <  root.value) return 1 + this.depthRec(node, root.left);
+        else if (!root.left || node.value > root.value) return 1 + this.depth(node, root.right);
+        else if (!root.right || node.value <  root.value) return 1 + this.depth(node, root.left);
         else return -1;
     }
 
-    depth(node: TreeNode<E> | null): number {
-        return this.depthRec(node, this.root);
-    }
-
-    isBalancedRec(root: TreeNode<E> | null): boolean {
+    isBalanced(root: TreeNode | null = this.root): boolean {
         if (!root) return false;
-        else if (!root.left && this.heightRec(root.right) <= 1) return true;
-        else if (!root.right && this.heightRec(root.left) <= 1) return true;
+        else if (!root.left && this.height(root.right) <= 1) return true;
+        else if (!root.right && this.height(root.left) <= 1) return true;
         else if (!root.left || !root.right) return false;
 
-        const smallHeightDifference = Math.abs(this.heightRec(root.left) - this.heightRec(root.right)) <= 1;
-        return smallHeightDifference && this.isBalancedRec(root.left) && this.isBalancedRec(root.right);
+        const smallHeightDifference = Math.abs(this.height(root.left) - this.height(root.right)) <= 1;
+        return smallHeightDifference && this.isBalanced(root.left) && this.isBalanced(root.right);
     }
 
-    isBalanced(): boolean {
-        return this.isBalancedRec(this.root);
-    }
+    rebalance(root: TreeNode | null = this.root): TreeNode | null {
+        let arr = this.levelOrder([root], []);
+        arr.sort((a, b) => a - b);
 
-    rebalance() {
-        //WIP
+        this.root = this.sortedArrayToBST(arr);
+        return this.root;
     }
 }
+
+
