@@ -12,16 +12,16 @@ export class Tree {
     root: TreeNode | null;
 
     constructor(arr: number[]) {
-        this.root = this.sortedArrayToBST(arr, 0, arr.length);
+        this.root = this.sortedArrayToBST(arr, 0, arr.length - 1);
     }
 
     sortedArrayToBST(arr: number[], start: number = 0, end: number = arr.length - 1): TreeNode | null {
         if (start > end) return null;
-        const mid = Math.floor((start - end) / 2);
-        const node = new TreeNode(arr[mid]);
+        const mid = Math.floor((start + end) / 2);
+        const node = new TreeNode(Math.floor(arr[mid]));
 
-        node.left = this.sortedArrayToBST(arr, start, mid);
-        node.right = this.sortedArrayToBST(arr, mid, end);
+        node.left = this.sortedArrayToBST(arr, start, mid - 1);
+        node.right = this.sortedArrayToBST(arr, mid + 1, end);
 
         return node;
     }

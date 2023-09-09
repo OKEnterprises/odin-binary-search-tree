@@ -18,17 +18,17 @@ var TreeNode = /** @class */ (function () {
 }());
 var Tree = /** @class */ (function () {
     function Tree(arr) {
-        this.root = this.sortedArrayToBST(arr, 0, arr.length);
+        this.root = this.sortedArrayToBST(arr, 0, arr.length - 1);
     }
     Tree.prototype.sortedArrayToBST = function (arr, start, end) {
         if (start === void 0) { start = 0; }
         if (end === void 0) { end = arr.length - 1; }
         if (start > end)
             return null;
-        var mid = Math.floor((start - end) / 2);
-        var node = new TreeNode(arr[mid]);
-        node.left = this.sortedArrayToBST(arr, start, mid);
-        node.right = this.sortedArrayToBST(arr, mid, end);
+        var mid = Math.floor((start + end) / 2);
+        var node = new TreeNode(Math.floor(arr[mid]));
+        node.left = this.sortedArrayToBST(arr, start, mid - 1);
+        node.right = this.sortedArrayToBST(arr, mid + 1, end);
         return node;
     };
     Tree.prototype.find = function (value) {
